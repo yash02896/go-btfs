@@ -26,6 +26,7 @@ func doGuardAndPay(rss *sessions.RenterSession, res *escrowpb.SignedPayinResult,
 	}
 	cts := make([]*guardpb.Contract, 0)
 	selectedHosts := make([]string, 0)
+	shardHashContractIdMap := make(map[string]string)
 	for i, h := range rss.ShardHashes {
 		shard, err := sessions.GetRenterShard(rss.CtxParams, rss.SsId, h, i)
 		if err != nil {
@@ -40,6 +41,7 @@ func doGuardAndPay(rss *sessions.RenterSession, res *escrowpb.SignedPayinResult,
 		contracts.SignedGuardContract.LastModifyTime = time.Now()
 		cts = append(cts, contracts.SignedGuardContract)
 		selectedHosts = append(selectedHosts, contracts.SignedGuardContract.HostPid)
+		shardHashContractIdMap[h] = contracts.SignedGuardContract.ContractId
 	}
 	fsStatus, err := NewFileStatus(cts, rss.CtxParams.Cfg, cts[0].ContractMeta.RenterPid, rss.Hash, fileSize)
 	if err != nil {
@@ -92,6 +94,8 @@ func doGuardAndPay(rss *sessions.RenterSession, res *escrowpb.SignedPayinResult,
 		return err
 	}
 
+	printQuestions(rss, qs, shardHashContractIdMap)
+
 	fcid, err := cidlib.Parse(rss.Hash)
 	if err != nil {
 		return err
@@ -101,6 +105,23 @@ func doGuardAndPay(rss *sessions.RenterSession, res *escrowpb.SignedPayinResult,
 		return fmt.Errorf("failed to send challenge questions to guard: [%v]", err)
 	}
 	return waitUpload(rss, offlineSigning, fsStatus, false)
+}
+
+// btfs storage challenge request <peer-id> <contract-id> <file-hash> <shard-hash> <chunk-index> <nonce>
+func printQuestions(rss *sessions.RenterSession, qs []*guardpb.ShardChallengeQuestions, shardHashContractIdMap map[string]string) {
+	fileHash := rss.Hash
+	for _, scq := range qs {
+		shardHash := scq.ShardHash
+		contractId := shardHashContractIdMap[shardHash]
+		for _, question := range scq.Questions {
+			hostId := question.HostPid
+			chunkIndex := question.ChunkIndex
+			nonce := question.Nonce
+			answer := question.ExpectAnswer
+			fmt.Println("btfs storage challenge request",
+				hostId, contractId, fileHash, shardHash, chunkIndex, nonce, answer)
+		}
+	}
 }
 
 func NewFileStatus(contracts []*guardpb.Contract, configuration *config.Config,
