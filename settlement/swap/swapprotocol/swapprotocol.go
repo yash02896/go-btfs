@@ -116,7 +116,7 @@ func (s *Service) Handler(ctx context.Context, requestPid string, encodedCheque 
 
 // InitiateCheque attempts to send a cheque to a peer.
 func (s *Service) EmitCheque(ctx context.Context, peer string, amount *big.Int, contractId string, issue IssueFunc) (balance *big.Int, err error) {
-	ctx, cancel := context.WithTimeout(ctx, 10*60*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
 	sentAmount := amount
@@ -140,7 +140,7 @@ func (s *Service) EmitCheque(ctx context.Context, peer string, amount *big.Int, 
 				log.Warnf("get handshakeInfo from peer %v (%v) error", peerhostPid)
 				return ErrGetBeneficiary
 			}
-			ctx, _ := context.WithTimeout(context.Background(), 10*60*time.Second)
+			ctx, _ := context.WithTimeout(context.Background(), 60*time.Second)
 			node, coreApi, err := extractNodeAndApi(Req, Env)
 			if err != nil {
 				return err
@@ -216,7 +216,7 @@ func (s *Service) EmitCheque(ctx context.Context, peer string, amount *big.Int, 
 			wg.Add(1)
 			go func() {
 				err = func() error {
-					ctx, _ := context.WithTimeout(context.Background(), 10*60*time.Second)
+					ctx, _ := context.WithTimeout(context.Background(), 60*time.Second)
 					node, coreApi, err := extractNodeAndApi(Req, Env)
 					if err != nil {
 						return err
