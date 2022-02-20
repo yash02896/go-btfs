@@ -37,10 +37,20 @@ var ConvertCmd = &cmds.Command{
 			fmt.Println(common.BytesToAddress(b))
 			return nil
 		} else if strings.HasPrefix(input, "0x") { // bttc address -> tron address
-			fmt.Println("TODO")
+			var addrBytes []byte
+			b, _ := hex.DecodeString(crypto.AddressPrefix)
+			addrBytes = append(addrBytes, b...)
+			b, _ = hex.DecodeString(input[2:])
+			addrBytes = append(addrBytes, b...)
+			r, _ := crypto.Encode58Check(addrBytes)
+			fmt.Println(r)
 			return nil
 		} else if len(input) == 64 { // private key hex -> base64
-			fmt.Println("TODO")
+			b, _ := hex.DecodeString(input)
+			base64.StdEncoding.EncodeToString(b)
+			sk, _ := ic.UnmarshalSecp256k1PrivateKey(b)
+			b, _ = sk.Bytes()
+			fmt.Println(base64.StdEncoding.EncodeToString(b))
 			return nil
 		}
 
