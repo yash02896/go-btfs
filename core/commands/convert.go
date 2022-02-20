@@ -20,6 +20,16 @@ type ConvertOutput struct {
 }
 
 var ConvertCmd = &cmds.Command{
+	Helptext: cmds.HelpText{
+		Tagline: "multiconvert",
+		ShortDescription: `
+btfs convert 16U...          -> 0x...           (peer id -> bttc addr)
+btfs convert CAISI...        -> private key hex (pk base64 -> pk hex)
+btfs convert T...            -> 0x...           (tron addr -> bttc addr)
+btfs convert 0x...           -> T...            (bttc addr -> tron addr)
+btfs convert private key hex -> CAISI...        (pk hex -> pk base64)
+`,
+	},
 	Arguments: []cmds.Argument{
 		cmds.StringArg("input", true, false, ""),
 	},
