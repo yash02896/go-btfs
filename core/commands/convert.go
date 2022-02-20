@@ -36,7 +36,7 @@ btfs convert private key hex -> CAISI...        (pk hex -> pk base64)
 	Run: func(req *cmds.Request, res cmds.ResponseEmitter, env cmds.Environment) error {
 		input := req.Arguments[0]
 		if strings.HasPrefix(input, "16U") { // peerid -> bttc address
-			fmt.Println(ConvertPeerID2BttcAddr(input))
+			fmt.Println(convertPeerID2BttcAddr(input))
 			return nil
 		} else if strings.HasPrefix(input, "CAISI") { // private key base64 -> hex
 			pkb, _ := base64.StdEncoding.DecodeString(input)
@@ -68,7 +68,7 @@ btfs convert private key hex -> CAISI...        (pk hex -> pk base64)
 	},
 }
 
-func ConvertPeerID2BttcAddr(peerID string) string {
+func convertPeerID2BttcAddr(peerID string) string {
 	tmp, _ := peer.Decode(peerID)
 	pppk, _ := tmp.ExtractPublicKey()
 
