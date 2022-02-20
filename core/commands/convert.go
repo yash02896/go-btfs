@@ -35,18 +35,23 @@ btfs convert private key hex -> CAISI...        (pk hex -> pk base64)
 	},
 	Run: func(req *cmds.Request, res cmds.ResponseEmitter, env cmds.Environment) error {
 		input := req.Arguments[0]
-		if strings.HasPrefix(input, "16U") { // peerid -> bttc address
-			fmt.Println(convertPeerID2BttcAddr(input))
+		switch {
+		case strings.HasPrefix(input, "16U"):
+			id, _ := peer.Decode(input)
+			pk, _ := id.ExtractPublicKey()
+			pkBytes, _ := ic.RawFull(pk)
+			pk2, _ := eth.UnmarshalPubkey(pkBytes)
+			fmt.Println(eth.PubkeyToAddress(*pk2))
 			return nil
-		} else if strings.HasPrefix(input, "CAISI") { // private key base64 -> hex
+		case strings.HasPrefix(input, "CAISI"):
 			pkb, _ := base64.StdEncoding.DecodeString(input)
 			fmt.Println(hex.EncodeToString(pkb[4:]))
 			return nil
-		} else if strings.HasPrefix(input, "T") { // tron address -> bttc address
+		case strings.HasPrefix(input, "T"):
 			b, _ := crypto.Decode58Check(input)
 			fmt.Println(common.BytesToAddress(b))
 			return nil
-		} else if strings.HasPrefix(input, "0x") { // bttc address -> tron address
+		case strings.HasPrefix(input, "0x"):
 			var addrBytes []byte
 			b, _ := hex.DecodeString(crypto.AddressPrefix)
 			addrBytes = append(addrBytes, b...)
@@ -55,26 +60,15 @@ btfs convert private key hex -> CAISI...        (pk hex -> pk base64)
 			r, _ := crypto.Encode58Check(addrBytes)
 			fmt.Println(r)
 			return nil
-		} else if len(input) == 64 { // private key hex -> base64
+		case len(input) == 64:
 			b, _ := hex.DecodeString(input)
 			base64.StdEncoding.EncodeToString(b)
 			sk, _ := ic.UnmarshalSecp256k1PrivateKey(b)
 			b, _ = sk.Bytes()
 			fmt.Println(base64.StdEncoding.EncodeToString(b))
 			return nil
+		default:
+			return errors.New("error input")
 		}
-
-		return errors.New("error input")
 	},
-}
-
-func convertPeerID2BttcAddr(peerID string) string {
-	tmp, _ := peer.Decode(peerID)
-	pppk, _ := tmp.ExtractPublicKey()
-
-	pkBytes, _ := ic.RawFull(pppk)
-	pk2, _ := eth.UnmarshalPubkey(pkBytes)
-
-	addr := eth.PubkeyToAddress(*pk2)
-	return addr.String()
 }
