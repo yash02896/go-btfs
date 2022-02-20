@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/tron-us/go-btfs-common/crypto"
 	"strings"
 
 	cmds "github.com/bittorrent/go-btfs-cmds"
@@ -22,12 +24,23 @@ var ConvertCmd = &cmds.Command{
 		cmds.StringArg("input", true, false, ""),
 	},
 	Run: func(req *cmds.Request, res cmds.ResponseEmitter, env cmds.Environment) error {
-		if strings.HasPrefix(req.Arguments[0], "16U") {
-			fmt.Println(ConvertPeerID2BttcAddr(req.Arguments[0]))
+		input := req.Arguments[0]
+		if strings.HasPrefix(input, "16U") { // peerid -> bttc address
+			fmt.Println(ConvertPeerID2BttcAddr(input))
 			return nil
-		} else if strings.HasPrefix(req.Arguments[0], "CAISI") {
-			pkb, _ := base64.StdEncoding.DecodeString(req.Arguments[0])
+		} else if strings.HasPrefix(input, "CAISI") { // private key base64 -> hex
+			pkb, _ := base64.StdEncoding.DecodeString(input)
 			fmt.Println(hex.EncodeToString(pkb[4:]))
+			return nil
+		} else if strings.HasPrefix(input, "T") { // tron address -> bttc address
+			b, _ := crypto.Decode58Check(input)
+			fmt.Println(common.BytesToAddress(b))
+			return nil
+		} else if strings.HasPrefix(input, "0x") { // bttc address -> tron address
+			fmt.Println("TODO")
+			return nil
+		} else if len(input) == 64 { // private key hex -> base64
+			fmt.Println("TODO")
 			return nil
 		}
 
