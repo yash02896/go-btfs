@@ -96,6 +96,7 @@ func TestCommands(t *testing.T) {
 		"/config/profile/apply",
 		"/config/optin",
 		"/config/optout",
+		"/convert",
 		"/dag",
 		"/dag/get",
 		"/dag/export",
