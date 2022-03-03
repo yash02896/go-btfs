@@ -143,6 +143,7 @@ func (s *Service) EmitCheque(ctx context.Context, peer string, amount *big.Int, 
 			ctx, _ := context.WithTimeout(context.Background(), 60*time.Second)
 			node, coreApi, err := extractNodeAndApi(Req, Env)
 			if err != nil {
+				fmt.Println("get handshakeInfo extractNodeAndApi, err", err)
 				return err
 			}
 
@@ -153,6 +154,7 @@ func (s *Service) EmitCheque(ctx context.Context, peer string, amount *big.Int, 
 			)
 
 			if err != nil {
+				fmt.Println("get handshakeInfo P2PCall /p2p/handshake, err", err)
 				return err
 			}
 
@@ -164,6 +166,7 @@ func (s *Service) EmitCheque(ctx context.Context, peer string, amount *big.Int, 
 			//store beneficiary to db
 			_, err = s.swap.PutBeneficiary(peer, common.BytesToAddress(handshakeInfo.Beneficiary))
 			if err != nil {
+				fmt.Println("get handshakeInfo PutBeneficiary, err", err)
 				log.Warnf("put beneficiary (%s) error: %s", handshakeInfo.Beneficiary, err)
 				return err
 			}
