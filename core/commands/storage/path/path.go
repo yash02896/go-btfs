@@ -409,7 +409,7 @@ func move(src string, dst string) error {
 	if err := copyDir(src, dst); err != nil {
 		return err
 	}
-	return nil
+	return os.RemoveAll(src)
 }
 
 func copyDir(src string, dst string) error {

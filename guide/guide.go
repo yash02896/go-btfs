@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/markbates/pkger"
@@ -16,6 +17,7 @@ const (
 	pageFilePath       = "/hostui"
 	pagePath           = "/hostui"
 	infoPath           = "/api/v1/guide-info"
+	shutdownPath       = "/api/v1/shutdown"
 	serverCloseTimeout = 5 * time.Second
 )
 
@@ -75,9 +77,22 @@ func newServer() *http.Server {
 		_, _ = w.Write(encodeResp)
 	})
 
+	// shutdown
+	shutdown := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("content-type", "text/json")
+		w.WriteHeader(http.StatusOK)
+		resp := map[string]interface{}{
+			"message": "ok",
+		}
+		encodeResp, _ := json.Marshal(resp)
+		_, _ = w.Write(encodeResp)
+		os.Exit(0)
+	})
+
 	// router
 	mux.Handle(pagePath+"/", page)
 	mux.Handle(infoPath+"/", info)
+	mux.Handle(shutdownPath, shutdown)
 
 	return &http.Server{
 		Addr:    serverAddr,

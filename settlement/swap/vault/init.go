@@ -29,12 +29,6 @@ const (
 func checkBalance(ctx context.Context, swapBackend transaction.Backend, overlayEthAddress common.Address) error {
 	var guideServerStarted bool
 	for {
-		// check if context has been cancelled
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
-		}
 		timeoutCtx, _ := context.WithTimeout(ctx, balanceCheckBackoffDuration*time.Duration(balanceCheckMaxRetries))
 		ethBalance, err := swapBackend.BalanceAt(timeoutCtx, overlayEthAddress, nil)
 		if err != nil {
